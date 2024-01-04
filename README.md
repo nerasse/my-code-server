@@ -76,20 +76,28 @@ To access the VS Code Server securely with a domain name and SSL:
 ### Configuring Nginx exemple
 
  ```nginx
- # my code server
- server {
-     listen 443 ssl;
-     server_name my-code-server.domain.com;
+# my code server
+server {
+    listen 443 ssl;
+    server_name my-code-server.domain.com;
 
-     ssl_certificate /ssl/.domain.com.cer;
-     ssl_certificate_key /ssl/.domain.com.key;
+    ssl_certificate /ssl/.domain.com.cer;
+    ssl_certificate_key /ssl/.domain.com.key;
 
-     location / {
-         set $codeservervar my-code-server.vscode-server-network:8585;
-         proxy_pass http://$codeservervar;
-         # Other necessary configurations...
-     }
- }
+    location / {
+        set $codeservervar my-code-server.vscode-server-network:8585;
+        proxy_pass http://$codeservervar;        
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # WebSocket support
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
  ```
 
 #### SSL Certificates
