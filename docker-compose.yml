@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  vscode-server:
+    container_name: my-code-server
+    image: my-code-server
+    ports:
+      - "8585:8585"
+    #store the data in the host (optional : uncomment the volumes section and change the path)
+    #volumes:
+    #  - /home/<USER>/appdata/my-code-server:/home/vscodeuser/
+    
+    #optional : add the network
+    networks:
+      - vscode-server-network
+
+#optional : add the network 
+networks:
+  vscode-server-network:
+    external: false
+    name: vscode-server-network
+
