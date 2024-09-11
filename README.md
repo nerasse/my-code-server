@@ -1,4 +1,4 @@
-# Visual Studio Code Server Docker Setup
+# VS-Code Server -- Docker Setup & config
 
 ## Introduction
 
