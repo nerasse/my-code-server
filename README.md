@@ -14,13 +14,23 @@ Before you begin, ensure you have the following installed:
 - Docker Compose (for using the docker-compose.yml)
 - Reverse Proxy (for websocket)
 
-## Building the Docker Image
+## Getting Image
+
+### Pull image from Docker Package Registry
+
+To pull the pre-built image from Docker Package Registry, execute the following command:
+
+```bash
+docker pull ghcr.io/nerasse/my-code-server:main
+```
+
+### Building the Docker Image
 
     1. Clone this repository to your local machine.
     2. Navigate to the directory containing the Dockerfile.
     3. Build the Docker image with the following command:
 
-    sudo docker build -t my-code-server:debian .
+    sudo docker build -t my-code-server:main .
 
 ## Running the Container Using Docker Run
 
@@ -29,7 +39,7 @@ If you prefer to use `docker run` instead of Docker Compose, follow these steps:
    Execute the following command to run the VS Code Server container:
 
 ```bash
-   docker run -d -p 3000:8586 -e PORT=8585 -e TOKEN=sometoken my-code-server:debian
+   docker run -d -p 3000:8586 -e PORT=8585 -e TOKEN=sometoken my-code-server:main
 ```
 
 Explanation of flags:
@@ -43,10 +53,10 @@ Accessing VS Code Server:
 
 Once the container is running, you can access the VS Code Server by navigating to:
 
-```yes
+```link
 http://host:8585?tkn=sometoken
-
 ```
+
 host should be replaced with your actual host IP address or domain name.
 
 
