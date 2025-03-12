@@ -1,8 +1,5 @@
 # Use Ubuntu as the base image
-FROM ubuntu:latest
-
-# Set the root password for the IDE system
-RUN echo 'root:<root_password>' | chpasswd
+FROM debian:latest
 
 # Install necessary packages
 RUN apt-get update && apt-get install -y software-properties-common apt-transport-https wget
@@ -22,19 +19,26 @@ RUN apt-get -y install sudo -y \
     wget \
     unzip \
     npm \
-    ssh
+    ssh && \
+    apt-get clean autoclean && \
+    apt-get autoremove --yes && \
+    rm -rf /var/lib/{apt,dpkg,cache,log}/
+
+# Copy start.sh to the container
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
 
 # Create a non-root user
-RUN useradd -m vscodeuser
+RUN useradd -m vscodeuser && \
+    echo 'vscodeuser ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/vscodeuser && \
+    chmod 0444 /etc/sudoers.d/vscodeuser && \
+    usermod -aG sudo vscodeuser
 
 # Switch to the non-root user
 USER vscodeuser
 
 # Set the home directory for the non-root user
-ENV HOME /home/vscodeuser
+ENV HOME=/home/vscodeuser
 
-# Expose the port for VS Code
-EXPOSE 8585
-
-# Start Visual Studio Code on port 8585 from anywhere (0.0.0.0)
-CMD ["code", "serve-web", "--host", "0.0.0.0", "--port", "8585", "--user-data-dir", "/home/vscodeuser", "--connection-token", "<token_to_define>"]
+# Exécutez le script au lancement du conteneur
+ENTRYPOINT ["sh", "/app/start.sh"]
