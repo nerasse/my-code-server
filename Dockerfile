@@ -37,4 +37,4 @@ ENV HOME /home/vscodeuser
 EXPOSE 8585
 
 # Start Visual Studio Code on port 8585 from anywhere (0.0.0.0)
-CMD ["code", "serve-web", "--host", "0.0.0.0", "--port", "8585", "--user-data-dir", "/home/vscodeuser", "--connection-token", "<token_to_define>"]
+CMD ["code", "serve-web", "--host", "0.0.0.0", "--port", "8585", "--connection-token", "<token_to_define>"]
