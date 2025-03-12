@@ -1,9 +1,7 @@
-version: '3.8'
-
 services:
   vscode-server:
     container_name: my-code-server
-    image: my-code-server:debian
+    image: ghcr.io/nerasse/my-code-server:debian
     ports:
       - "8585:8586"
     environment:

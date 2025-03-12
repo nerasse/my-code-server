@@ -14,7 +14,17 @@ Before you begin, ensure you have the following installed:
 - Docker Compose (for using the docker-compose.yml)
 - Reverse Proxy (for websocket)
 
-## Building the Docker Image
+## Getting Image
+
+### Pull image from Docker Package Registry
+
+To pull the pre-built image from Docker Package Registry, execute the following command:
+
+```bash
+docker pull ghcr.io/nerasse/my-code-server:debian
+```
+
+### Building the Docker Image
 
     1. Clone this repository to your local machine.
     2. Navigate to the directory containing the Dockerfile.
