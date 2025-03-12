@@ -21,7 +21,7 @@ Before you begin, ensure you have the following installed:
 To pull the pre-built image from Docker Package Registry, execute the following command:
 
 ```bash
-docker pull ghcr.io/nerasse/my-code-server:main
+docker pull ghcr.io/nerasse/my-code-server:debian
 ```
 
 ### Building the Docker Image
@@ -30,7 +30,7 @@ docker pull ghcr.io/nerasse/my-code-server:main
     2. Navigate to the directory containing the Dockerfile.
     3. Build the Docker image with the following command:
 
-    sudo docker build -t my-code-server:main .
+    sudo docker build -t my-code-server:debian .
 
 ## Running the Container Using Docker Run
 
@@ -39,7 +39,7 @@ If you prefer to use `docker run` instead of Docker Compose, follow these steps:
    Execute the following command to run the VS Code Server container:
 
 ```bash
-   docker run -d -p 3000:8586 -e PORT=8585 -e TOKEN=sometoken my-code-server:main
+   docker run -d -p 3000:8586 -e PORT=8585 -e TOKEN=sometoken my-code-server:debian
 ```
 
 Explanation of flags:
