@@ -43,10 +43,10 @@ Accessing VS Code Server:
 
 Once the container is running, you can access the VS Code Server by navigating to:
 
-```yes
+```link
 http://host:8585?tkn=sometoken
-
 ```
+
 host should be replaced with your actual host IP address or domain name.
 
 
