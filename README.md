@@ -47,7 +47,7 @@ Explanation of flags:
     -d: Run the container in detached mode (in the background).
     -p 8585:8585: Map port 8585 of the host to port 8585 of the container (adjust if you changed the default port).
     -e PORT=8585: Set the environment variable `PORT` to 8585 (adjust if you changed the default port).
-    -e TOKEN=sometoken: Set a token for authentication (optional). If not provided, a default token will be generated.
+    -e TOKEN=sometoken: Set a token for authentication (optional).
 
 Accessing VS Code Server:
 
