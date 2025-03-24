@@ -39,7 +39,7 @@ If you prefer to use `docker run` instead of Docker Compose, follow these steps:
    Execute the following command to run the VS Code Server container:
 
 ```bash
-   docker run -d -p 3000:8586 -e PORT=8585 -e TOKEN=sometoken my-code-server:main
+   docker run -d -p 8585:8585 -e PORT=8585 -e TOKEN=sometoken my-code-server:main
 ```
 
 Explanation of flags:
