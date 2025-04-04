@@ -5,8 +5,8 @@ echo "my-code-server debian container"
 
 # Check if PORT environment variable is set, default to 8585 if not
 if [ -z "$PORT" ]; then
-    echo "No PORT provided, using default port: 8585"
-    PORT=8585
+    echo "No PORT provided, using default port: 8000"
+    PORT=8000
 else
     echo "Using provided port: $PORT"
 fi
