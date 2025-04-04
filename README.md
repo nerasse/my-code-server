@@ -81,11 +81,20 @@ Use Docker Compose to start the VS Code server:
 
 ## Environment Variables
 
-- `PORT`: The port on which the VS Code Server will listen (default is `8586`).
-- `TOKEN`: A token for authentication. If not provided, a default token will be generated.
-- `SERVER_DATA_DIR`: The directory where the server data is stored.
-- `USER_DATA_DIR`: The directory where user data is stored.
-- `EXTENSIONS_DIR`: The directory where extensions are stored.
+The following environment variables can be configured:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `PORT` | The port on which VS Code Server will listen | `8585` |
+| `HOST` | The host interface to listen on | `0.0.0.0` |
+| `TOKEN` | A connection token for authentication | No token if not provided |
+| `TOKEN_FILE` | Path to a file containing a connection token | - |
+| `SERVER_DATA_DIR` | Directory where server data is stored | - |
+| `SERVER_BASE_PATH` | Path under which the web UI and code server is provided | - |
+| `SOCKET_PATH` | Socket path for the server to use | - |
+| `VERBOSE` | Enable verbose output | `false` |
+| `LOG_LEVEL` | Log level (trace, debug, info, warn, error, critical, off) | - |
+| `CLI_DATA_DIR` | Directory where CLI metadata should be stored | - |
 
 ## Setup: Nginx Reverse Proxy Configuration
 
