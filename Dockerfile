@@ -31,29 +31,12 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
         apt-get update && apt-get install -y /tmp/vscode-arm64.deb && \
         rm /tmp/vscode-arm64.deb && rm -rf /var/lib/apt/lists/*; \
     elif [ "$TARGETARCH" = "arm" ] && [ "$TARGETVARIANT" = "v7" ]; then \
-        # Installer les dépendances requises d'abord
-        apt-get update && apt-get install -y \
-            libasound2 \
-            libatk-bridge2.0-0 \
-            libatk1.0-0 \
-            libatspi2.0-0 \
-            libcurl4 \
-            libglib2.0-0 \
-            libgtk-3-0 \
-            libgbm1 \
-            libdrm2 \
-            libxkbcommon0 \
-            libxcomposite1 \
-            libxdamage1 \
-            libxfixes3 \
-            libxrandr2 \
-            libgbm1 \
-            libnss3 \
-            libnspr4 \
-            libxshmfence1 && \
-        wget https://aka.ms/linux-armhf-deb -O /tmp/vscode-armhf.deb && \
-        apt-get install -y /tmp/vscode-armhf.deb && \
-        rm /tmp/vscode-armhf.deb && rm -rf /var/lib/apt/lists/*; \
+        # Pour ARMv7 - Ajouter le dépôt Raspberry Pi
+        wget -qO- https://archive.raspberrypi.org/debian/raspberrypi.gpg.key | gpg --dearmor > /tmp/raspberrypi.gpg && \
+        install -o root -g root -m 644 /tmp/raspberrypi.gpg /etc/apt/trusted.gpg.d/ && \
+        echo "deb [arch=armhf] http://archive.raspberrypi.org/debian/ bookworm main" > /etc/apt/sources.list.d/raspi.list && \
+        rm /tmp/raspberrypi.gpg && \
+        apt-get update && apt-get install -y code && rm -rf /var/lib/apt/lists/*; \
     else \
         echo "VS Code is not available for $TARGETARCH$TARGETVARIANT - skipping installation"; \
     fi
