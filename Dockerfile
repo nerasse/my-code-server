@@ -1,5 +1,14 @@
-# Use Debian latest as the base image
-FROM debian:latest
+# Use different base images based on architecture
+ARG TARGETARCH
+ARG TARGETVARIANT
+
+# For ARMv7, use Raspberry Pi OS (Bookworm), otherwise use Debian latest
+FROM --platform=linux/arm/v7 debian:bookworm AS base-armv7
+FROM --platform=linux/amd64 debian:latest AS base-amd64
+FROM --platform=linux/arm64 debian:latest AS base-arm64
+
+# Select the appropriate base
+FROM base-${TARGETARCH}${TARGETVARIANT:+-${TARGETVARIANT}} AS base
 
 # Arguments pour la détection de l'architecture
 ARG TARGETARCH
@@ -31,12 +40,8 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
         apt-get update && apt-get install -y /tmp/vscode-arm64.deb && \
         rm /tmp/vscode-arm64.deb && rm -rf /var/lib/apt/lists/*; \
     elif [ "$TARGETARCH" = "arm" ] && [ "$TARGETVARIANT" = "v7" ]; then \
-        # Pour ARMv7 - Ajouter TOUS les dépôts Raspberry Pi nécessaires
         wget -qO- https://archive.raspberrypi.org/debian/raspberrypi.gpg.key | gpg --dearmor > /tmp/raspberrypi.gpg && \
         install -o root -g root -m 644 /tmp/raspberrypi.gpg /etc/apt/trusted.gpg.d/ && \
-        echo "deb http://deb.debian.org/debian bookworm main contrib non-free" > /etc/apt/sources.list && \
-        echo "deb http://deb.debian.org/debian bookworm-updates main contrib non-free" >> /etc/apt/sources.list && \
-        echo "deb http://security.debian.org/debian-security bookworm-security main contrib non-free" >> /etc/apt/sources.list && \
         echo "deb http://archive.raspberrypi.org/debian/ bookworm main" > /etc/apt/sources.list.d/raspi.list && \
         rm /tmp/raspberrypi.gpg && \
         apt-get update && apt-get install -y code && rm -rf /var/lib/apt/lists/*; \
