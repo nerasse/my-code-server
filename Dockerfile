@@ -1,17 +1,14 @@
-# Arguments pour la détection de l'architecture
 ARG TARGETARCH
 ARG TARGETVARIANT
 
-# Use different base images based on architecture
-FROM debian:bookworm AS base-arm-v7
-FROM debian:latest AS base-amd64
-FROM debian:latest AS base-arm64
+# Choose base image based on architecture
+FROM debian:bookworm AS base-armv7
+FROM debian:latest AS base-default
 
-# Select the appropriate base using TARGETPLATFORM
-ARG TARGETPLATFORM
-FROM base-${TARGETPLATFORM#linux/} AS final
+# This hack uses TARGETARCH and TARGETVARIANT to select the right stage
+FROM base-${TARGETARCH:-default}${TARGETVARIANT} AS base
 
-# Re-declare args after FROM
+# Re-declare build args
 ARG TARGETARCH
 ARG TARGETVARIANT
 
