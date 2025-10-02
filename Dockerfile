@@ -21,21 +21,38 @@ RUN apt-get update && apt-get install -y \
 
 # Install VS Code based on architecture
 RUN if [ "$TARGETARCH" = "amd64" ]; then \
-        # Pour AMD64, utiliser le dépôt Microsoft
         wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /tmp/packages.microsoft.gpg && \
         install -o root -g root -m 644 /tmp/packages.microsoft.gpg /etc/apt/trusted.gpg.d/ && \
         echo "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list && \
         rm /tmp/packages.microsoft.gpg && \
         apt-get update && apt-get install -y code && rm -rf /var/lib/apt/lists/*; \
     elif [ "$TARGETARCH" = "arm64" ]; then \
-        # Pour ARM64, télécharger le .deb directement
         wget https://aka.ms/linux-arm64-deb -O /tmp/vscode-arm64.deb && \
         apt-get update && apt-get install -y /tmp/vscode-arm64.deb && \
         rm /tmp/vscode-arm64.deb && rm -rf /var/lib/apt/lists/*; \
     elif [ "$TARGETARCH" = "arm" ] && [ "$TARGETVARIANT" = "v7" ]; then \
-        # Pour ARMv7, télécharger le .deb directement
+        # Installer les dépendances requises d'abord
+        apt-get update && apt-get install -y \
+            libasound2 \
+            libatk-bridge2.0-0 \
+            libatk1.0-0 \
+            libatspi2.0-0 \
+            libcurl4 \
+            libglib2.0-0 \
+            libgtk-3-0 \
+            libgbm1 \
+            libdrm2 \
+            libxkbcommon0 \
+            libxcomposite1 \
+            libxdamage1 \
+            libxfixes3 \
+            libxrandr2 \
+            libgbm1 \
+            libnss3 \
+            libnspr4 \
+            libxshmfence1 && \
         wget https://aka.ms/linux-armhf-deb -O /tmp/vscode-armhf.deb && \
-        apt-get update && apt-get install -y /tmp/vscode-armhf.deb && \
+        apt-get install -y /tmp/vscode-armhf.deb && \
         rm /tmp/vscode-armhf.deb && rm -rf /var/lib/apt/lists/*; \
     else \
         echo "VS Code is not available for $TARGETARCH$TARGETVARIANT - skipping installation"; \
