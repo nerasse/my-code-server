@@ -1,16 +1,17 @@
-# Use different base images based on architecture
+# Arguments pour la détection de l'architecture
 ARG TARGETARCH
 ARG TARGETVARIANT
 
-# For ARMv7, use Raspberry Pi OS (Bookworm), otherwise use Debian latest
-FROM --platform=linux/arm/v7 debian:bookworm AS base-armv7
-FROM --platform=linux/amd64 debian:latest AS base-amd64
-FROM --platform=linux/arm64 debian:latest AS base-arm64
+# Use different base images based on architecture
+FROM debian:bookworm AS base-arm-v7
+FROM debian:latest AS base-amd64
+FROM debian:latest AS base-arm64
 
-# Select the appropriate base
-FROM base-${TARGETARCH}${TARGETVARIANT:+-${TARGETVARIANT}} AS base
+# Select the appropriate base using TARGETPLATFORM
+ARG TARGETPLATFORM
+FROM base-${TARGETPLATFORM#linux/} AS final
 
-# Arguments pour la détection de l'architecture
+# Re-declare args after FROM
 ARG TARGETARCH
 ARG TARGETVARIANT
 
