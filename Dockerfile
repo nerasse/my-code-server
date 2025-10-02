@@ -1,12 +1,7 @@
-# Use build arg to select base image
-ARG TARGETARCH
-ARG TARGETVARIANT
-ARG BASE_IMAGE=debian:latest
+# Use Debian latest as the base image
+FROM debian:latest
 
-# For ARMv7, override to use bookworm
-FROM ${BASE_IMAGE} AS base
-
-# Re-declare build args after FROM
+# Arguments pour la détection de l'architecture
 ARG TARGETARCH
 ARG TARGETVARIANT
 
@@ -36,11 +31,7 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
         apt-get update && apt-get install -y /tmp/vscode-arm64.deb && \
         rm /tmp/vscode-arm64.deb && rm -rf /var/lib/apt/lists/*; \
     elif [ "$TARGETARCH" = "arm" ] && [ "$TARGETVARIANT" = "v7" ]; then \
-        wget -qO- https://archive.raspberrypi.org/debian/raspberrypi.gpg.key | gpg --dearmor > /tmp/raspberrypi.gpg && \
-        install -o root -g root -m 644 /tmp/raspberrypi.gpg /etc/apt/trusted.gpg.d/ && \
-        echo "deb http://archive.raspberrypi.org/debian/ bookworm main" > /etc/apt/sources.list.d/raspi.list && \
-        rm /tmp/raspberrypi.gpg && \
-        apt-get update && apt-get install -y code && rm -rf /var/lib/apt/lists/*; \
+        echo "VS Code is not available for armv7 - skipping installation"; \
     else \
         echo "VS Code is not available for $TARGETARCH$TARGETVARIANT - skipping installation"; \
     fi
