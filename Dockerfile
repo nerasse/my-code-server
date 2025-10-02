@@ -31,10 +31,13 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
         apt-get update && apt-get install -y /tmp/vscode-arm64.deb && \
         rm /tmp/vscode-arm64.deb && rm -rf /var/lib/apt/lists/*; \
     elif [ "$TARGETARCH" = "arm" ] && [ "$TARGETVARIANT" = "v7" ]; then \
-        # Pour ARMv7 - Ajouter le dépôt Raspberry Pi
+        # Pour ARMv7 - Ajouter TOUS les dépôts Raspberry Pi nécessaires
         wget -qO- https://archive.raspberrypi.org/debian/raspberrypi.gpg.key | gpg --dearmor > /tmp/raspberrypi.gpg && \
         install -o root -g root -m 644 /tmp/raspberrypi.gpg /etc/apt/trusted.gpg.d/ && \
-        echo "deb [arch=armhf] http://archive.raspberrypi.org/debian/ bookworm main" > /etc/apt/sources.list.d/raspi.list && \
+        echo "deb http://deb.debian.org/debian bookworm main contrib non-free" > /etc/apt/sources.list && \
+        echo "deb http://deb.debian.org/debian bookworm-updates main contrib non-free" >> /etc/apt/sources.list && \
+        echo "deb http://security.debian.org/debian-security bookworm-security main contrib non-free" >> /etc/apt/sources.list && \
+        echo "deb http://archive.raspberrypi.org/debian/ bookworm main" > /etc/apt/sources.list.d/raspi.list && \
         rm /tmp/raspberrypi.gpg && \
         apt-get update && apt-get install -y code && rm -rf /var/lib/apt/lists/*; \
     else \
