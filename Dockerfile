@@ -1,21 +1,14 @@
-# Use Debian latest as the base image by default
-FROM debian:latest AS base
-
-# Arguments pour la détection de l'architecture
+# Use build arg to select base image
 ARG TARGETARCH
 ARG TARGETVARIANT
+ARG BASE_IMAGE=debian:latest
 
-# For ARMv7, downgrade to Bookworm to avoid t64 conflicts
-RUN if [ "$TARGETARCH" = "arm" ] && [ "$TARGETVARIANT" = "v7" ]; then \
-        # Change sources to bookworm
-        echo "deb http://deb.debian.org/debian bookworm main contrib non-free" > /etc/apt/sources.list && \
-        echo "deb http://deb.debian.org/debian bookworm-updates main contrib non-free" >> /etc/apt/sources.list && \
-        echo "deb http://security.debian.org/debian-security bookworm-security main contrib non-free" >> /etc/apt/sources.list && \
-        apt-get update && \
-        apt-get install -y --allow-downgrades \
-            apt=$(apt-cache policy apt | grep bookworm | head -1 | awk '{print $1}') \
-            libc6=$(apt-cache policy libc6 | grep bookworm | head -1 | awk '{print $1}') || true; \
-    fi
+# For ARMv7, override to use bookworm
+FROM ${BASE_IMAGE} AS base
+
+# Re-declare build args after FROM
+ARG TARGETARCH
+ARG TARGETVARIANT
 
 # Install necessary packages
 RUN apt-get update && apt-get install -y \
