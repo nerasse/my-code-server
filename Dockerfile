@@ -1,16 +1,21 @@
+# Use Debian latest as the base image by default
+FROM debian:latest AS base
+
+# Arguments pour la détection de l'architecture
 ARG TARGETARCH
 ARG TARGETVARIANT
 
-# Choose base image based on architecture
-FROM debian:bookworm AS base-armv7
-FROM debian:latest AS base-default
-
-# This hack uses TARGETARCH and TARGETVARIANT to select the right stage
-FROM base-${TARGETARCH:-default}${TARGETVARIANT} AS base
-
-# Re-declare build args
-ARG TARGETARCH
-ARG TARGETVARIANT
+# For ARMv7, downgrade to Bookworm to avoid t64 conflicts
+RUN if [ "$TARGETARCH" = "arm" ] && [ "$TARGETVARIANT" = "v7" ]; then \
+        # Change sources to bookworm
+        echo "deb http://deb.debian.org/debian bookworm main contrib non-free" > /etc/apt/sources.list && \
+        echo "deb http://deb.debian.org/debian bookworm-updates main contrib non-free" >> /etc/apt/sources.list && \
+        echo "deb http://security.debian.org/debian-security bookworm-security main contrib non-free" >> /etc/apt/sources.list && \
+        apt-get update && \
+        apt-get install -y --allow-downgrades \
+            apt=$(apt-cache policy apt | grep bookworm | head -1 | awk '{print $1}') \
+            libc6=$(apt-cache policy libc6 | grep bookworm | head -1 | awk '{print $1}') || true; \
+    fi
 
 # Install necessary packages
 RUN apt-get update && apt-get install -y \
