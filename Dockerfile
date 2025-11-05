@@ -20,20 +20,28 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install VS Code based on architecture
-RUN if [ "$TARGETARCH" = "amd64" ]; then \
+RUN ARCH=$(dpkg --print-architecture) && \
+    echo "Detected architecture: $ARCH (TARGETARCH=$TARGETARCH)" && \
+    if [ "$TARGETARCH" = "amd64" ] || [ "$ARCH" = "amd64" ]; then \
+        echo "Installing VS Code for amd64..." && \
         wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /tmp/packages.microsoft.gpg && \
         install -o root -g root -m 644 /tmp/packages.microsoft.gpg /etc/apt/trusted.gpg.d/ && \
         echo "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list && \
         rm /tmp/packages.microsoft.gpg && \
-        apt-get update && apt-get install -y code && rm -rf /var/lib/apt/lists/*; \
-    elif [ "$TARGETARCH" = "arm64" ]; then \
+        apt-get update && apt-get install -y code && rm -rf /var/lib/apt/lists/* && \
+        echo "VS Code installed successfully" && \
+        which code || (echo "ERROR: code command not found after installation!" && exit 1); \
+    elif [ "$TARGETARCH" = "arm64" ] || [ "$ARCH" = "arm64" ]; then \
+        echo "Installing VS Code for arm64..." && \
         wget https://aka.ms/linux-arm64-deb -O /tmp/vscode-arm64.deb && \
         apt-get update && apt-get install -y /tmp/vscode-arm64.deb && \
-        rm /tmp/vscode-arm64.deb && rm -rf /var/lib/apt/lists/*; \
+        rm /tmp/vscode-arm64.deb && rm -rf /var/lib/apt/lists/* && \
+        echo "VS Code installed successfully" && \
+        which code || (echo "ERROR: code command not found after installation!" && exit 1); \
     elif [ "$TARGETARCH" = "arm" ] && [ "$TARGETVARIANT" = "v7" ]; then \
-        echo "VS Code is not available for armv7 - skipping installation"; \
+        echo "ERROR: VS Code is not available for armv7" && exit 1; \
     else \
-        echo "VS Code is not available for $TARGETARCH$TARGETVARIANT - skipping installation"; \
+        echo "ERROR: VS Code is not available for architecture: $TARGETARCH$TARGETVARIANT ($ARCH)" && exit 1; \
     fi
 
 # Additional cleanup
