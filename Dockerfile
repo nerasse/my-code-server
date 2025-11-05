@@ -39,9 +39,9 @@ RUN ARCH=$(dpkg --print-architecture) && \
         echo "VS Code installed successfully" && \
         which code || (echo "ERROR: code command not found after installation!" && exit 1); \
     elif [ "$TARGETARCH" = "arm" ] && [ "$TARGETVARIANT" = "v7" ]; then \
-        echo "ERROR: VS Code is not available for armv7" && exit 1; \
+        echo "WARNING: VS Code is not officially available for armv7 - container will be built without VS Code"; \
     else \
-        echo "ERROR: VS Code is not available for architecture: $TARGETARCH$TARGETVARIANT ($ARCH)" && exit 1; \
+        echo "WARNING: VS Code is not available for architecture: $TARGETARCH$TARGETVARIANT ($ARCH) - container will be built without VS Code"; \
     fi
 
 # Additional cleanup
