@@ -3,10 +3,13 @@ services:
     container_name: my-code-server
     image: ghcr.io/nerasse/my-code-server:main
     ports:
-      - "8585:8586"
+      - "${HOST_PORT:-8585}:${CONTAINER_PORT:-8585}"
     environment:
-      - PORT=8586
-      - TOKEN=sometoken
+      - PORT=${CONTAINER_PORT:-8585}
+      - TOKEN=${TOKEN:-sometoken}
+      # Uncomment to set custom UID/GID for the vscodeuser (useful for volume permissions)
+      #- PUID=${PUID:-1000}
+      #- PGID=${PGID:-1000}
     #store the data in the host (optional : uncomment the volumes section and change the path)
     #volumes:
     #  - /home/<USER>/appdata/my-code-server:/home/vscodeuser/

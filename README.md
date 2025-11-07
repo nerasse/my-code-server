@@ -1,127 +1,152 @@
-# VS-Code Server - Docker Setup & config
+# VS-Code Server - Docker Setup & Config
 
-## Introduction
+Official VS Code Server in Docker with WebSocket support, full extension compatibility (including GitHub Copilot), based on Debian.
 
-This repository hosts a Docker setup for deploying an official installation of Visual Studio Code Server using a container. By leveraging the `serve-web` feature of Visual Studio Code, this setup provides an instance of VS Code accessible through a web browser. The base image used is **Debian**, ensuring a light, stable and familiar environment for development. Included in this setup are a Dockerfile and a docker-compose.yml file, simplifying the deployment process.
+## Quick Start
 
-**Note:** This setup aims to maintain compatibility with all Visual Studio Code extensions, including those like GitHub Copilot Chat, by using the official version of VS Code Server. It is designed with the intention to support the full range of VS Code features and extensions without the limitations often encountered in non-official installations.
+```bash
+# Pull and run
+docker pull ghcr.io/nerasse/my-code-server:main
+docker run -d -p 8585:8585 -e TOKEN=yourtoken ghcr.io/nerasse/my-code-server:main
 
-## Prerequisites
+# Or with docker-compose
+docker compose up -d
+```
 
-Before you begin, ensure you have the following installed:
+Access: `http://localhost:8585?tkn=yourtoken`
+
+## Installation
+
+### Prerequisites
 
 - Docker
-- Docker Compose (for using the docker-compose.yml)
-- Reverse Proxy (for websocket)
+- Docker Compose (optional)
+- Reverse Proxy (optional, for production)
 
-## Getting Image
-
-### Pull image from Docker Package Registry
-
-To pull the pre-built image from Docker Package Registry, execute the following command:
+### Option 1: Using Pre-built Image
 
 ```bash
 docker pull ghcr.io/nerasse/my-code-server:main
 ```
 
-### Building the Docker Image
-
-    1. Clone this repository to your local machine.
-    2. Navigate to the directory containing the Dockerfile.
-    3. Build the Docker image with the following command:
-
-    sudo docker build -t my-code-server:main .
-
-## Running the Container Using Docker Run
-
-If you prefer to use `docker run` instead of Docker Compose, follow these steps:
-
-   Execute the following command to run the VS Code Server container:
+### Option 2: Build Locally
 
 ```bash
-   docker run -d -p 8585:8585 -e PORT=8585 -e TOKEN=sometoken my-code-server:main
+# Using buildx (recommended)
+docker buildx build -t my-code-server:main .
+
+# Or using legacy builder
+docker build -t my-code-server:main .
 ```
 
-Explanation of flags:
+## Usage
 
-    -d: Run the container in detached mode (in the background).
-    -p 8585:8585: Map port 8585 of the host to port 8585 of the container (adjust if you changed the default port).
-    -e PORT=8585: Set the environment variable `PORT` to 8585 (adjust if you changed the default port).
-    -e TOKEN=sometoken: Set a token for authentication (optional).
+### Docker Compose (Recommended)
 
-Accessing VS Code Server:
-
-Once the container is running, you can access the VS Code Server by navigating to:
-
-```link
-http://host:8585?tkn=sometoken
+**Basic usage:**
+```bash
+docker compose up -d
 ```
 
-host should be replaced with your actual host IP address or domain name.
+**With custom configuration (.env file):**
+```env
+HOST_PORT=9090
+CONTAINER_PORT=8585
+TOKEN=mysecuretoken
+PUID=1000
+PGID=1000
+```
 
+**With volumes (for persistence):**
+Uncomment in `docker-compose.yml`:
+```yaml
+volumes:
+  - /path/to/your/data:/home/vscodeuser
+```
 
-Start using the `docker run` command, along with explanations of the command-line options and additional management commands.
+### Docker Run
 
-## Starting the VS Code Server with docker compose
+**Basic:**
+```bash
+docker run -d -p 8585:8585 \
+  -e PORT=8585 \
+  -e TOKEN=sometoken \
+  my-code-server:main
+```
 
-Use Docker Compose to start the VS Code server:
-
-    1. Navigate to the directory containing the`docker-compose.yml` file.
-    2. Run the following command:
-
-    docker compose up -d
-
-    3. Once the container is running, the VS Code server will be accessible at`http://localhost:8585`.
+**With volumes and custom UID/GID:**
+```bash
+docker run -d -p 8585:8585 \
+  -e PORT=8585 \
+  -e TOKEN=sometoken \
+  -e PUID=$(id -u) \
+  -e PGID=$(id -g) \
+  -v /path/to/your/data:/home/vscodeuser \
+  my-code-server:main
+```
 
 ## Configuration
 
-- Default port is `8585`.
-- Authentication is optional. If not provided, no token will be required.
-- To persist data on the host, uncomment the `volumes` section in the `docker-compose.yml` and specify the path.
-
-## Environment Variables
-
-The following environment variables can be configured:
+### Environment Variables
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `PORT` | The port on which VS Code Server will listen | `8585` |
-| `HOST` | The host interface to listen on | `0.0.0.0` |
-| `TOKEN` | A connection token for authentication | No token if not provided |
-| `TOKEN_FILE` | Path to a file containing a connection token | - |
-| `SERVER_DATA_DIR` | Directory where server data is stored | - |
-| `SERVER_BASE_PATH` | Path under which the web UI and code server is provided | - |
-| `SOCKET_PATH` | Socket path for the server to use | - |
+| `PORT` | VS Code Server listening port | `8585` |
+| `HOST` | Host interface to listen on | `0.0.0.0` |
+| `TOKEN` | Connection token for authentication | None |
+| `TOKEN_FILE` | Path to file containing token | - |
+| `PUID` | User ID (for volume permissions) | `1000` |
+| `PGID` | Group ID (for volume permissions) | `1000` |
+| `SERVER_DATA_DIR` | Server data storage directory | - |
+| `SERVER_BASE_PATH` | Base path for web UI | - |
+| `SOCKET_PATH` | Socket path for server | - |
 | `VERBOSE` | Enable verbose output | `false` |
 | `LOG_LEVEL` | Log level (trace, debug, info, warn, error, critical, off) | - |
-| `CLI_DATA_DIR` | Directory where CLI metadata should be stored | - |
+| `CLI_DATA_DIR` | CLI metadata directory | - |
 
-## Setup: Nginx Reverse Proxy Configuration
+### Docker Compose Variables
 
-To access the VS Code Server (also securely with a domain name and SSL):
+Use environment variables or `.env` file:
 
-### Optional Setup: Network Configuration
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `HOST_PORT` | Host port mapping | `8585` |
+| `CONTAINER_PORT` | Container port | `8585` |
+| `TOKEN` | Authentication token | `sometoken` |
+| `PUID` | User ID | `1000` |
+| `PGID` | Group ID | `1000` |
 
-- The container uses the `vscode-server-network` network.
-- The container name is `my-code-server`.
+### Custom UID/GID
 
-### Configuring Nginx HTTP exemple
+To avoid permission issues with mounted volumes, the container supports dynamic UID/GID:
+
+**With docker-compose:** Set `PUID` and `PGID` environment variables
+**With docker run:** Use `-e PUID=$(id -u) -e PGID=$(id -g)`
+
+The container will automatically adjust user permissions at startup.
+
+## Nginx Reverse Proxy Setup
+
+### Network Configuration
+
+- Container name: `my-code-server`
+- Network: `vscode-server-network`
+
+### HTTP Configuration
 
 ```nginx
-# my code server
 server {
     listen 80;
     server_name my-code-server.domain.com;
 
     location / {
-        set $codeservervar my-code-server.vscode-server-network:8585;
-        proxy_pass http://$codeservervar;  
+        proxy_pass http://my-code-server.vscode-server-network:8585;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
 
-        # WebSocket support
+        # WebSocket support (required)
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
@@ -129,10 +154,9 @@ server {
 }
 ```
 
-### Configuring Nginx HTTPS/SSL exemple
+### HTTPS/SSL Configuration
 
 ```nginx
-# my code server
 server {
     listen 443 ssl;
     server_name my-code-server.domain.com;
@@ -141,14 +165,13 @@ server {
     ssl_certificate_key /ssl/.domain.com.key;
 
     location / {
-        set $codeservervar my-code-server.vscode-server-network:8585;
-        proxy_pass http://$codeservervar;    
+        proxy_pass http://my-code-server.vscode-server-network:8585;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
 
-        # WebSocket support
+        # WebSocket support (required)
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
@@ -156,17 +179,17 @@ server {
 }
 ```
 
-#### SSL Certificates
+Access: `https://my-code-server.domain.com?tkn=yourtoken`
 
-Make sure to have valid SSL certificates for 443 ssl usage.
+## Architecture Support
 
-### Accessing VS Code Server
+- **amd64** (x86_64) - ✅ Fully supported
+- **arm64** (aarch64) - ❓ Should work (not tested yet)
+- **armv7** - ❌ Not supported
 
-Access via `https://my-code-server.domain.com` plus `?tkn=sometoken` in the URL if you have set `sometoken` as your token.
+## Security
 
-## Security Note
-
-**Replace all passwords and tokens with secure values. Please be aware of the security implications of using default or published credentials on repositories.**
+⚠️ **Important:** Replace default tokens with secure values. Never use published credentials in production.
 
 ## Contributing
 
