@@ -53,17 +53,17 @@ RUN apt-get clean autoclean && \
 COPY start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
-# Create a non-root user
-RUN useradd -m vscodeuser && \
+# Create a non-root user with default UID/GID (will be adjustable at runtime via env vars)
+RUN groupadd -g 1000 vscodeuser && \
+    useradd -m -u 1000 -g 1000 -s /bin/bash vscodeuser && \
     echo 'vscodeuser ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/vscodeuser && \
     chmod 0440 /etc/sudoers.d/vscodeuser && \
     usermod -aG sudo vscodeuser
 
-# Switch to the non-root user
-USER vscodeuser
+# Don't switch to vscodeuser yet - start.sh will handle it
 
 # Set the home directory for the non-root user
 ENV HOME=/home/vscodeuser
 
-# Exécutez le script au lancement du conteneur
-ENTRYPOINT ["sh", "/app/start.sh"]
+# Exécutez le script au lancement du conteneur (as root to allow UID/GID changes)
+ENTRYPOINT ["/app/start.sh"]

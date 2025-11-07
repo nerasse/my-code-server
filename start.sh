@@ -2,6 +2,37 @@
 
 echo "my-code-server debian container"
 
+# Handle UID/GID changes if environment variables are set
+if [ -n "$PUID" ] || [ -n "$PGID" ]; then
+  CURRENT_UID=$(id -u vscodeuser)
+  CURRENT_GID=$(id -g vscodeuser)
+  TARGET_UID=${PUID:-$CURRENT_UID}
+  TARGET_GID=${PGID:-$CURRENT_GID}
+  
+  if [ "$CURRENT_UID" != "$TARGET_UID" ] || [ "$CURRENT_GID" != "$TARGET_GID" ]; then
+    echo "Changing vscodeuser UID:GID from $CURRENT_UID:$CURRENT_GID to $TARGET_UID:$TARGET_GID"
+    
+    # Change GID if needed
+    if [ "$CURRENT_GID" != "$TARGET_GID" ]; then
+      groupmod -g $TARGET_GID vscodeuser
+    fi
+    
+    # Change UID if needed
+    if [ "$CURRENT_UID" != "$TARGET_UID" ]; then
+      usermod -u $TARGET_UID vscodeuser
+    fi
+    
+    # Fix permissions on home directory
+    chown -R vscodeuser:vscodeuser /home/vscodeuser
+    
+    echo "UID/GID changed successfully"
+  else
+    echo "Using default UID:GID $CURRENT_UID:$CURRENT_GID"
+  fi
+else
+  echo "Using default UID:GID $(id -u vscodeuser):$(id -g vscodeuser)"
+fi
+
 # Check if PORT environment variable is set, default to 8585 if not
 if [ -z "$PORT" ]; then
   echo "No PORT provided, using default port: 8585"
@@ -76,6 +107,6 @@ if [ -n "$CLI_DATA_DIR" ]; then
   CMD="$CMD --cli-data-dir $CLI_DATA_DIR"
 fi
 
-# Execute the final command
-echo "Executing: $CMD"
-exec $CMD
+# Execute the final command as vscodeuser
+echo "Executing: $CMD (as vscodeuser)"
+exec su - vscodeuser -c "$CMD"
