@@ -12,20 +12,35 @@ if [ -n "$PUID" ] || [ -n "$PGID" ]; then
   if [ "$CURRENT_UID" != "$TARGET_UID" ] || [ "$CURRENT_GID" != "$TARGET_GID" ]; then
     echo "Changing vscodeuser UID:GID from $CURRENT_UID:$CURRENT_GID to $TARGET_UID:$TARGET_GID"
     
-    # Change GID if needed
-    if [ "$CURRENT_GID" != "$TARGET_GID" ]; then
-      groupmod -g $TARGET_GID vscodeuser
+    # Check if target UID already exists
+    EXISTING_USER=$(getent passwd $TARGET_UID | cut -d: -f1)
+    if [ -n "$EXISTING_USER" ] && [ "$EXISTING_USER" != "vscodeuser" ]; then
+      echo "WARNING: UID $TARGET_UID already exists for user '$EXISTING_USER'"
+      echo "Removing conflicting user '$EXISTING_USER'"
+      userdel $EXISTING_USER
     fi
     
-    # Change UID if needed
-    if [ "$CURRENT_UID" != "$TARGET_UID" ]; then
-      usermod -u $TARGET_UID vscodeuser
+    # Check if target GID already exists
+    EXISTING_GROUP=$(getent group $TARGET_GID | cut -d: -f1)
+    
+    if [ -n "$EXISTING_GROUP" ] && [ "$EXISTING_GROUP" != "vscodeuser" ]; then
+      # GID exists, use the existing group
+      echo "GID $TARGET_GID already exists as group '$EXISTING_GROUP', using it"
+      usermod -u $TARGET_UID -g $TARGET_GID vscodeuser
+    else
+      # GID doesn't exist or belongs to vscodeuser, safe to modify
+      if [ "$CURRENT_GID" != "$TARGET_GID" ]; then
+        groupmod -g $TARGET_GID vscodeuser
+      fi
+      if [ "$CURRENT_UID" != "$TARGET_UID" ]; then
+        usermod -u $TARGET_UID vscodeuser
+      fi
     fi
     
     # Fix permissions on home directory
-    chown -R vscodeuser:vscodeuser /home/vscodeuser
+    chown -R $TARGET_UID:$TARGET_GID /home/vscodeuser
     
-    echo "UID/GID changed successfully"
+    echo "UID/GID changed successfully to $(id -u vscodeuser):$(id -g vscodeuser)"
   else
     echo "Using default UID:GID $CURRENT_UID:$CURRENT_GID"
   fi
