@@ -85,19 +85,16 @@ if [ -n "$SOCKET_PATH" ]; then
   CMD="$CMD --socket-path $SOCKET_PATH"
 fi
 
-# Check if TOKEN environment variable is set
-if [ -z "$TOKEN" ]; then
-  echo "No TOKEN provided, starting without token"
-  CMD="$CMD --without-connection-token"
-else
+# Check if TOKEN or TOKEN_FILE environment variable is set
+if [ -n "$TOKEN" ]; then
   echo "Starting with token: $TOKEN"
   CMD="$CMD --connection-token $TOKEN"
-fi
-
-# Check if TOKEN_FILE environment variable is set
-if [ -n "$TOKEN_FILE" ]; then
+elif [ -n "$TOKEN_FILE" ]; then
   echo "Using token file: $TOKEN_FILE"
   CMD="$CMD --connection-token-file $TOKEN_FILE"
+else
+  echo "No TOKEN or TOKEN_FILE provided, starting without token"
+  CMD="$CMD --without-connection-token"
 fi
 
 # Always accept the server license terms
